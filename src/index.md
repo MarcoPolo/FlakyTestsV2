@@ -10,7 +10,11 @@ Test Failures: ${(failureCount)[0].count}
 
 Using n=${numberOfJobs[0].count} runs of `go test`.
 
-### Flakiness Score: ${Math.round(calculateOddsAnyTestFails(failurePercent.map(x => x.failure_percent))*100)}%
+```js
+const flakinessScore = Math.round(calculateOddsAnyTestFails(failurePercentLastNDays.map(x => x.failure_percent))*100)
+```
+### Flakiness Score: ${flakinessScore}%
+
 Lower is better. This is roughly the odds that any given run will fail because of a flaky test
 
 </div>
@@ -180,6 +184,9 @@ const numberOfJobs = await db.sql`SELECT COUNT(DISTINCT BatchInsertTime) as coun
 
 
 ```js
+let nDays = '-3 days'
+```
+```js
 let failurePercent = await db.sql`SELECT
     Test,
     Package,
@@ -200,6 +207,31 @@ GROUP BY
     Go
 HAVING
     pass_count > 0 AND fail_count > 0 AND Test != '';`
+
+let failurePercentLastNDays = await db.sql`SELECT
+    Test,
+    Package,
+    (Package || "." || Test) as PackageTest,
+    OS,
+    Go,
+    Time,
+    SUM(CASE WHEN Action = 'pass' THEN 1 ELSE 0 END) AS pass_count,
+    SUM(CASE WHEN Action = 'fail' THEN 1 ELSE 0 END) AS fail_count,
+    CAST(SUM(CASE WHEN Action = 'fail' THEN 1 ELSE 0 END) AS FLOAT) /
+    SUM(CASE WHEN Action = 'pass' OR Action = 'fail' THEN 1 ELSE 0 END) AS failure_percent
+FROM
+    test_results
+WHERE
+    Time > datetime('now', ${nDays})
+GROUP BY
+    Test,
+    Package,
+    OS,
+    Go
+HAVING
+    pass_count > 0 AND fail_count > 0 AND Test != '';`
+
+failurePercentLastNDays = keepOnlyLeafTests(failurePercentLastNDays)
 
 failurePercent = keepOnlyLeafTests(failurePercent)
 display(failurePercent)
