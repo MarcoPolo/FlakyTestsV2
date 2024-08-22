@@ -48,7 +48,7 @@ type artifacts struct {
 func main() {
 	githubToken := os.Getenv("GITHUB_TOKEN")
 	g := &github{auth: githubToken}
-	res, err := g.Get("/repos/libp2p/go-libp2p/actions/workflows/" + GoTestWorkflowID + "/runs")
+	res, err := g.Get("/repos/libp2p/go-libp2p/actions/workflows/" + GoTestWorkflowID + "/runs?branch=master")
 	if err != nil {
 		log.Fatal(err)
 	}
