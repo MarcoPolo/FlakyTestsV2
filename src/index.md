@@ -106,9 +106,7 @@ let failedTests = await db.sql`
       t1.WorkflowID
       ;
 `;
-display(failedTests)
 failedTests = keepOnlyLeafTests(failedTests)
-display(failedTests)
 ```
 
 ## Logs of failed tests
@@ -189,7 +187,6 @@ HAVING
 failurePercentLastNDays = keepOnlyLeafTests(failurePercentLastNDays)
 
 failurePercent = keepOnlyLeafTests(failurePercent)
-display(failurePercent)
 
 function keepOnlyLeafTests(data) {
   console.log(data)
@@ -292,6 +289,6 @@ function chartFlakesOverTime(width, height) {
 // Monte Carlo style simulation. Easier than doing the math :P
 // Pass in an array of likelihood each test fails. e.g [0.1, 0.2] would mean job A has a failure rate of 0.1, and job B has a failure rate of 0.2
 function calculateOddsAnyTestFails(testCases) {
-  return 1-testCases.reduce((acc, v) => v*(1-acc))
+  return 1-(testCases.reduce((acc, v) => acc*(1-v), 1))
 }
 ```
