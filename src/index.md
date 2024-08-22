@@ -109,51 +109,6 @@ let failedTests = await db.sql`
 display(failedTests)
 failedTests = keepOnlyLeafTests(failedTests)
 display(failedTests)
-
-const x_ = `SELECT
-    tr_output.Package,
-    tr_output.Test,
-    tr_output.OS,
-    Failures,
-    tr_output.WorkflowID,
-    tr_output.BatchInsertTime,
-    GROUP_CONCAT(tr_output.Output,  "") AS Outputs
-FROM
-    test_results tr_fail
-JOIN
-    test_results tr_output
-ON
-    tr_fail.Test = tr_output.Test
-    AND tr_fail.BatchInsertTime = tr_output.BatchInsertTime
-    AND tr_fail.Package = tr_output.Package
-JOIN (
-    SELECT
-        Package,
-        Test,
-        COUNT(*) AS Failures
-    FROM
-        test_results
-    WHERE
-        Action = 'fail'
-    GROUP BY
-        Package,
-        Test
-) fail_count
-ON
-    tr_output.Package = fail_count.Package
-    AND tr_output.Test = fail_count.Test
-WHERE
-    tr_fail.Action = 'fail'
-    AND tr_output.Test != ''
-GROUP BY
-    tr_output.BatchInsertTime,
-    tr_output.Package,
-    tr_output.Test,
-    tr_output.OS
-ORDER BY
-    fail_count.failures DESC,
-    MIN(tr_output.Time);`;
-
 ```
 
 ## Logs of failed tests

@@ -92,7 +92,6 @@ func main() {
 	}
 	defer f.Close()
 	io.Copy(os.Stdout, f)
-
 }
 
 type github struct {
